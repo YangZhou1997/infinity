@@ -14,6 +14,9 @@
 namespace infinity {
 namespace core {
 
+#define QUEUE_DEFAULT_SIZE 128
+// 16351
+
 class Configuration {
 
 public:
@@ -22,13 +25,13 @@ public:
 	 * Queue length settings
 	 */
 
-	static const uint32_t SEND_COMPLETION_QUEUE_LENGTH = 16351; 		// Must be less than MAX_CQE
+	static const uint32_t SEND_COMPLETION_QUEUE_LENGTH = QUEUE_DEFAULT_SIZE; 		// Must be less than MAX_CQE
 
-	static const uint32_t RECV_COMPLETION_QUEUE_LENGTH = 16351; 		// Must be less than MAX_CQE
+	static const uint32_t RECV_COMPLETION_QUEUE_LENGTH = QUEUE_DEFAULT_SIZE; 		// Must be less than MAX_CQE
 
-	static const uint32_t SHARED_RECV_QUEUE_LENGTH = 16351; 			// Must be less than MAX_SRQ_WR
+	static const uint32_t SHARED_RECV_QUEUE_LENGTH = QUEUE_DEFAULT_SIZE; 			// Must be less than MAX_SRQ_WR
 
-	static const uint32_t MAX_NUMBER_OF_OUTSTANDING_REQUESTS = 16351;	// Must be less than (MAX_QP_WR * MAX_QP)
+	static const uint32_t MAX_NUMBER_OF_OUTSTANDING_REQUESTS = QUEUE_DEFAULT_SIZE;	// Must be less than (MAX_QP_WR * MAX_QP)
 																		// Since we use one single shared receive queue,
 																		// this number should be less than MAX_SRQ_WR
 
