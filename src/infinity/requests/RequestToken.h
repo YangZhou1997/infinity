@@ -12,7 +12,7 @@
 #include <atomic>
 #include <stdint.h>
 
-#include <infinity/core/Context.h>
+#include <infinity/queues/QueuePair.h>
 #include <infinity/memory/Region.h>
 
 namespace infinity {
@@ -22,7 +22,7 @@ class RequestToken {
 
 public:
 
-	RequestToken(infinity::core::Context *context);
+	RequestToken(infinity::queues::QueuePair *qp);
 
 	void reset();
 
@@ -46,7 +46,7 @@ public:
 
 protected:
 
-	infinity::core::Context * const context;
+	infinity::queues::QueuePair * const qp;
 	infinity::memory::Region * region;
 
 	std::atomic<bool> completed;

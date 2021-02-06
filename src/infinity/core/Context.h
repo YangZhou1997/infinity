@@ -39,14 +39,6 @@ class RequestToken;
 namespace infinity {
 namespace core {
 
-typedef struct {
-	infinity::memory::Buffer *buffer;
-	uint32_t bytesWritten;
-	uint32_t immediateValue;
-	bool immediateValueValid;
-	infinity::queues::QueuePair *queuePair;
-} receive_element_t;
-
 class Context {
 
 	friend class infinity::memory::Region;
@@ -55,7 +47,6 @@ class Context {
 	friend class infinity::memory::RegisteredMemory;
 	friend class infinity::queues::QueuePair;
 	friend class infinity::queues::QueuePairFactory;
-	friend class infinity::requests::RequestToken;
 
 public:
 
@@ -71,20 +62,6 @@ public:
 
 public:
 
-	/**
-	 * Check if receive operation completed
-	 */
-	bool receive(receive_element_t *receiveElement);
-	bool receive(infinity::memory::Buffer **buffer, uint32_t *bytesWritten, uint32_t *immediateValue, bool *immediateValueValid, infinity::queues::QueuePair **queuePair = NULL);
-
-	/**
-	 * Post a new buffer for receiving messages
-	 */
-	void postReceiveBuffer(infinity::memory::Buffer *buffer);
-
-public:
-
-	infinity::requests::RequestToken * defaultRequestToken;
 	infinity::memory::Atomic * defaultAtomic;
 
 protected:
@@ -112,28 +89,6 @@ protected:
 protected:
 
 	/**
-	 * Check if send operation completed
-	 */
-	bool pollSendCompletionQueue();
-
-	/**
-	 * Returns ibVerbs completion queue for sending
-	 */
-	ibv_cq * getSendCompletionQueue();
-
-	/**
-	 * Returns ibVerbs completion queue for receiving
-	 */
-	ibv_cq * getReceiveCompletionQueue();
-
-	/**
-	 * Returns ibVerbs shared receive queue
-	 */
-	ibv_srq * getSharedReceiveQueue();
-
-protected:
-
-	/**
 	 * IB context and protection domain
 	 */
 	ibv_context *ibvContext;
@@ -145,13 +100,6 @@ protected:
 	ibv_device *ibvDevice;
 	uint16_t ibvLocalDeviceId;
 	uint16_t ibvDevicePort;
-
-	/**
-	 * IB send and receive completion queues
-	 */
-	ibv_cq *ibvSendCompletionQueue;
-	ibv_cq *ibvReceiveCompletionQueue;
-	ibv_srq *ibvSharedReceiveQueue;
 
 protected:
 

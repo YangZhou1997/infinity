@@ -21,7 +21,7 @@
 #include <infinity/requests/RequestToken.h>
 
 #define PORT_NUMBER 8011
-#define SERVER_IP "192.0.0.1"
+#define SERVER_IP "10.0.0.1"
 #define BUFFER_COUNT 128
 #define MAX_BUFFER_SIZE 4096
 #define OPERATIONS_COUNT 1024
@@ -54,21 +54,25 @@ int main(int argc, char **argv) {
 
 	if (isServer) {
 
-		printf("Creating buffers to receive a messages\n");
+		printf("Creating buffers to receive messages\n");
 		infinity::memory::Buffer **receiveBuffers = new infinity::memory::Buffer *[BUFFER_COUNT];
 		for (uint32_t i = 0; i < BUFFER_COUNT; ++i) {
 			receiveBuffers[i] = new infinity::memory::Buffer(context, MAX_BUFFER_SIZE * sizeof(char));
-			context->postReceiveBuffer(receiveBuffers[i]);
 		}
 
 		printf("Waiting for incoming connection\n");
 		qpFactory->bindToPort(PORT_NUMBER);
 		qp = qpFactory->acceptIncomingConnection();
 
+		printf("Posting receive buffers to receive messages\n");
+        for (uint32_t i = 0; i < BUFFER_COUNT; ++i) {
+			qp->postReceiveBuffer(receiveBuffers[i]);
+		}
+
 		printf("Waiting for first message (first message has additional setup costs)\n");
-		infinity::core::receive_element_t receiveElement;
-		while (!context->receive(&receiveElement));
-		context->postReceiveBuffer(receiveElement.buffer);
+		infinity::queues::receive_element_t receiveElement;
+		while (!qp->receive(&receiveElement));
+		qp->postReceiveBuffer(receiveElement.buffer);
 
 		printf("Performing measurement\n");
 
@@ -82,9 +86,9 @@ int main(int argc, char **argv) {
 
 			uint32_t numberOfReceivedMessages = 0;
 			while (numberOfReceivedMessages < OPERATIONS_COUNT) {
-				while (!context->receive(&receiveElement));
+				while (!qp->receive(&receiveElement));
 				++numberOfReceivedMessages;
-				context->postReceiveBuffer(receiveElement.buffer);
+				qp->postReceiveBuffer(receiveElement.buffer);
 			}
 
 			messageSize *= 2;
@@ -94,8 +98,8 @@ int main(int argc, char **argv) {
 
 		printf("Sending notification to client\n");
 		infinity::memory::Buffer *sendBuffer = new infinity::memory::Buffer(context, sizeof(char));
-		qp->send(sendBuffer, context->defaultRequestToken);
-		context->defaultRequestToken->waitUntilCompleted();
+		qp->send(sendBuffer, qp->defaultRequestToken);
+		qp->defaultRequestToken->waitUntilCompleted();
 
 		printf("Clean up\n");
 		for (uint32_t i = 0; i < BUFFER_COUNT; ++i) {
@@ -112,11 +116,11 @@ int main(int argc, char **argv) {
 		printf("Creating buffers\n");
 		infinity::memory::Buffer *sendBuffer = new infinity::memory::Buffer(context, MAX_BUFFER_SIZE * sizeof(char));
 		infinity::memory::Buffer *receiveBuffer = new infinity::memory::Buffer(context, sizeof(char));
-		context->postReceiveBuffer(receiveBuffer);
+		qp->postReceiveBuffer(receiveBuffer);
 
 		printf("Sending first message\n");
-		qp->send(sendBuffer, sizeof(char), context->defaultRequestToken);
-		context->defaultRequestToken->waitUntilCompleted();
+		qp->send(sendBuffer, sizeof(char), qp->defaultRequestToken);
+		qp->defaultRequestToken->waitUntilCompleted();
 
 		printf("Performing measurement\n");
 		uint32_t rounds = (uint32_t) log2(MAX_BUFFER_SIZE);
@@ -133,7 +137,7 @@ int main(int argc, char **argv) {
 			for(uint32_t i=0; i<OPERATIONS_COUNT; ++i) {
 				if(i %BUFFER_COUNT == 0 || i == OPERATIONS_COUNT) {
 
-					infinity::requests::RequestToken requestToken(context);
+					infinity::requests::RequestToken requestToken(qp);
 					qp->send(sendBuffer, messageSize, &requestToken);
 					requestToken.waitUntilCompleted();
 
@@ -158,8 +162,8 @@ int main(int argc, char **argv) {
 		}
 
 		printf("Waiting for notification from server\n");
-		infinity::core::receive_element_t receiveElement;
-		while (!context->receive(&receiveElement));
+		infinity::queues::receive_element_t receiveElement;
+		while (!qp->receive(&receiveElement));
 
 		delete receiveBuffer;
 		delete sendBuffer;

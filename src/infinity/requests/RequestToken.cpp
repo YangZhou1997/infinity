@@ -11,8 +11,8 @@
 namespace infinity {
 namespace requests {
 
-RequestToken::RequestToken(infinity::core::Context *context) :
-		context(context) {
+RequestToken::RequestToken(infinity::queues::QueuePair *qp) :
+		qp(qp) {
 	this->success.store(false);
 	this->completed.store(false);
 	this->region = NULL;
@@ -32,14 +32,14 @@ bool RequestToken::checkIfCompleted() {
 	if (this->completed.load()) {
 		return true;
 	} else {
-		this->context->pollSendCompletionQueue();
+		this->qp->pollSendCompletionQueue();
 		return this->completed.load();
 	}
 }
 
 void RequestToken::waitUntilCompleted() {
 	while (!this->completed.load()) {
-		this->context->pollSendCompletionQueue();
+		this->qp->pollSendCompletionQueue();
 	}
 }
 

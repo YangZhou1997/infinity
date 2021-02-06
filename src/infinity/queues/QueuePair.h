@@ -41,9 +41,18 @@ public:
   int ibvFlags();
 };
 
+typedef struct {
+	infinity::memory::Buffer *buffer;
+	uint32_t bytesWritten;
+	uint32_t immediateValue;
+	bool immediateValueValid;
+	infinity::queues::QueuePair *queuePair;
+} receive_element_t;
+
 class QueuePair {
 
 	friend class infinity::queues::QueuePairFactory;
+	friend class infinity::requests::RequestToken;
 
 public:
 
@@ -147,8 +156,46 @@ protected:
 	ibv_qp* ibvQueuePair;
 	uint32_t sequenceNumber;
 
+	/**
+	 * IB send and receive completion queues
+	 */
+	ibv_cq *ibvSendCompletionQueue;
+	ibv_cq *ibvReceiveCompletionQueue;
+
 	void *userData;
 	uint32_t userDataSize;
+
+protected:
+
+	/**
+	 * Check if send operation completed
+	 */
+	bool pollSendCompletionQueue();
+
+	/**
+	 * Returns ibVerbs completion queue for sending
+	 */
+	ibv_cq * getSendCompletionQueue();
+
+	/**
+	 * Returns ibVerbs completion queue for receiving
+	 */
+	ibv_cq * getReceiveCompletionQueue();
+
+public:
+
+	infinity::requests::RequestToken * defaultRequestToken;
+
+	/**
+	 * Check if receive operation completed
+	 */
+	bool receive(receive_element_t *receiveElement);
+	bool receive(infinity::memory::Buffer **buffer, uint32_t *bytesWritten, uint32_t *immediateValue, bool *immediateValueValid, infinity::queues::QueuePair **queuePair = NULL);
+
+	/**
+	 * Post a new buffer for receiving messages
+	 */
+	void postReceiveBuffer(infinity::memory::Buffer *buffer);
 
 };
 
