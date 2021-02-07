@@ -53,6 +53,20 @@ Buffer::Buffer(infinity::core::Context* context, infinity::memory::RegisteredMem
 
 }
 
+Buffer::Buffer(infinity::core::Context* context, infinity::memory::RegisteredMemory* memory, void* buf, uint64_t sizeInBytes) {
+
+	this->context = context;
+	this->sizeInBytes = sizeInBytes;
+	this->memoryRegionType = RegionType::BUFFER;
+
+	this->data = reinterpret_cast<char *>(buf);
+	this->ibvMemoryRegion = memory->getRegion();
+
+	this->memoryAllocated = false;
+	this->memoryRegistered = false;
+
+}
+
 Buffer::Buffer(infinity::core::Context *context, void *memory, uint64_t sizeInBytes) {
 
 	this->context = context;
