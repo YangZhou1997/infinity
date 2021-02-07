@@ -7,9 +7,11 @@
  */
 
 #include "Buffer.h"
+#include <stdio.h>
 
 #include <infinity/utils/Debug.h>
 #include <infinity/memory/RegionToken.h>
+#include <infinity/utils/Debug.h>
 
 namespace infinity {
 namespace memory {

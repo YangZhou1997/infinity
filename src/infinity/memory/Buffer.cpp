@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <infinity/core/Configuration.h>
 #include <infinity/utils/Debug.h>
@@ -32,6 +33,11 @@ Buffer::Buffer(infinity::core::Context* context, uint64_t sizeInBytes) {
 
 	this->ibvMemoryRegion = ibv_reg_mr(this->context->getProtectionDomain(), this->data, this->sizeInBytes,
 			IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+
+    if(this->ibvMemoryRegion == NULL){
+        printf("Buffer ibvMemoryRegion allocation error %d\n", errno);
+        exit(0);
+    }
 	INFINITY_ASSERT(this->ibvMemoryRegion != NULL, "[INFINITY][MEMORY][BUFFER] Registration failed.\n");
 
 	this->memoryAllocated = true;
@@ -76,6 +82,10 @@ Buffer::Buffer(infinity::core::Context *context, void *memory, uint64_t sizeInBy
 	this->data = memory;
 	this->ibvMemoryRegion = ibv_reg_mr(this->context->getProtectionDomain(), this->data, this->sizeInBytes,
 			IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+    if(this->ibvMemoryRegion == NULL){
+        printf("Buffer ibvMemoryRegion allocation error %d\n", errno);
+        exit(0);
+    }
 	INFINITY_ASSERT(this->ibvMemoryRegion != NULL, "[INFINITY][MEMORY][BUFFER] Registration failed.\n");
 
 	this->memoryAllocated = false;
@@ -84,7 +94,6 @@ Buffer::Buffer(infinity::core::Context *context, void *memory, uint64_t sizeInBy
 }
 
 Buffer::~Buffer() {
-
 	if (this->memoryRegistered) {
 		ibv_dereg_mr(this->ibvMemoryRegion);
 	}

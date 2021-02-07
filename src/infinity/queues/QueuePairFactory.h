@@ -49,6 +49,9 @@ protected:
 	infinity::core::Context * context;
 
 	int32_t serverSocket;
+    
+    static void recv_until(int tcp_fd, void *buf, size_t expect);
+    static void send_until(int tcp_fd, const void *buf, size_t expect);
 
 };
 

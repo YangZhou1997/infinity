@@ -30,6 +30,10 @@ RegisteredMemory::RegisteredMemory(infinity::core::Context* context, uint64_t si
 
 	this->ibvMemoryRegion = ibv_reg_mr(this->context->getProtectionDomain(), this->data, this->sizeInBytes,
 			IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+    if(this->ibvMemoryRegion == NULL){
+        printf("RegisteredMemory ibvMemoryRegion allocation error %d\n", errno);
+        exit(0);
+    }
 	INFINITY_ASSERT(this->ibvMemoryRegion != NULL, "[INFINITY][MEMORY][REGISTERED] Registration failed.\n");
 }
 
@@ -43,6 +47,10 @@ RegisteredMemory::RegisteredMemory(infinity::core::Context* context, void *data,
 
 	this->ibvMemoryRegion = ibv_reg_mr(this->context->getProtectionDomain(), this->data, this->sizeInBytes,
 			IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+    if(this->ibvMemoryRegion == NULL){
+        printf("RegisteredMemory ibvMemoryRegion allocation error %d\n", errno);
+        exit(0);
+    }
 	INFINITY_ASSERT(this->ibvMemoryRegion != NULL, "[INFINITY][MEMORY][REGISTERED] Registration failed.\n");
 }
 
